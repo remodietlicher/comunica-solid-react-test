@@ -1,7 +1,6 @@
-import { IQueryResultBindings } from "@comunica/actor-init-sparql";
-
 import type { NextPage } from "next";
-import { newEngine } from "@comunica/actor-init-sparql-solid";
+// import { newEngine } from "@comunica/actor-init-sparql-solid";
+import { QueryEngine } from "@comunica/query-sparql-solid";
 import {
   getDefaultSession,
   handleIncomingRedirect,
@@ -10,7 +9,7 @@ import {
 import { Fragment, useEffect, useState } from "react";
 
 const Home: NextPage = () => {
-  const engine = newEngine();
+  const engine = new QueryEngine();
 
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
 
@@ -42,15 +41,15 @@ const Home: NextPage = () => {
       }
     `;
 
-    const raw = await engine.query(selectQuery, {
-      sources: [getDefaultSession().info.webId],
+    const bindingStream = await engine.queryBindings(selectQuery, {
+      sources: [getDefaultSession().info.webId!],
       "@comunica/actor-http-inrupt-solid-client-authn:session":
         getDefaultSession(),
     });
 
-    const bindings = await (raw as IQueryResultBindings).bindings();
+    const bindings = await bindingStream.toArray();
 
-    bindings.forEach((b) => console.log(b.get("?s").value));
+    bindings.forEach((b: any) => console.log(b?.get("s")?.value));
   };
 
   const insertQueryHandler = async () => {
@@ -58,19 +57,17 @@ const Home: NextPage = () => {
       INSERT DATA {
         <${
           getDefaultSession().info.webId?.split("#")[0]
-        }#Heidi> <http://xmlns.com/foaf/0.1/name> 'Heidi'
+        }#Seppli> <http://xmlns.com/foaf/0.1/name> 'Seppli'.
       }
     `;
 
     console.log(insertQuery);
 
-    const res = await engine.query(insertQuery, {
-      sources: [getDefaultSession().info.webId],
+    await engine.queryVoid(insertQuery, {
+      sources: [getDefaultSession().info.webId!],
       "@comunica/actor-http-inrupt-solid-client-authn:session":
         getDefaultSession(),
     });
-
-    await (res as any).updateResult;
   };
 
   return (
