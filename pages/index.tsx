@@ -18,7 +18,7 @@ const Home: NextPage = () => {
 
     login({
       redirectUrl: window.location.href,
-      oidcIssuer: "https://solid.tschenten.ch",
+      oidcIssuer: "https://solidweb.me",
       clientName: "Remo Dietlicher's CV",
     });
     setWebId(getDefaultSession().info.webId);
@@ -64,7 +64,7 @@ const Home: NextPage = () => {
     console.log(insertQuery);
 
     await engine.queryVoid(insertQuery, {
-      sources: [getDefaultSession().info.webId!],
+      sources: [{ type: "putLdp", value: getDefaultSession().info.webId! }],
       "@comunica/actor-http-inrupt-solid-client-authn:session":
         getDefaultSession(),
     });
